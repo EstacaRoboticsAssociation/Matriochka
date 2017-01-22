@@ -12,8 +12,8 @@
 #include <Inertial.h>
 #include <Switch.h>
 
-Inertial  inertial(13, 10);
-Switch    mechanical_switch(8, 5, 7, 1, 3);
+Inertial  inertial(6, 5);
+Switch    mechanical_switch(4, 2, 3, 0, 1);
 
 unsigned long   dt = 0.0;                 
 unsigned long   t_process = 0.0;          
@@ -24,12 +24,12 @@ bool  para_signal = false;
 bool  time_signal = false;
 bool  prop_signal = false;
 
-int IGNITION = 12;
+int IGNITION = 7;
 
 void setup() {
   Serial.begin(9600);
   pinMode(IGNITION, OUTPUT);
-  digitalWrite(IGNITION, LOW);
+  digitalWrite(IGNITION,LOW);
 }
 
 void loop() {
@@ -51,13 +51,13 @@ void loop() {
   }
 
   // Ignition command
-  if(tilt_signal && jack_signal && para_signal && time_signal){
+  if(tilt_signal && jack_signal && para_signal && time_signal && prop_signal){
     digitalWrite(IGNITION, HIGH);
   }
   else{
     digitalWrite(IGNITION, LOW);    
   }
-
+  
   // Time process
   dt = micros() - t_process;
 }

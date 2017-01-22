@@ -30,7 +30,7 @@ Switch::Switch(int ledTime, int ledJack, int ledPara, int JACK, int PARA)
 	current_time = 0; 
 	elapsed_time = 0;             
 	timerMin = 3;   
-	timerMax = 15;             
+	timerMax = 10;             
 }
 
 bool Switch::Time()
@@ -41,27 +41,27 @@ bool Switch::Time()
   
   // Start to send signal
   if(elapsed_time >= timerMin && elapsed_time <= timerMax){
-     time_signal = true;
-     digitalWrite(_ledTime, HIGH);
-     // Print one time in monitor
+	digitalWrite(_ledTime, HIGH);
+    time_signal = true;
+    // Print one time in monitor
      if(print_counter_2 == true){
         Serial.println("Timer signal become HIGH");
         Serial.println(current_time);
         print_counter_2 = false;
-     } 
+    } 
   }
    
    // Time is out, signal finished
   if(elapsed_time >= timerMax || elapsed_time <= timerMin){
+	digitalWrite(_ledTime, LOW);
     time_signal = false;
-    digitalWrite(_ledTime, LOW);
     // Print one time in monitor
     if(print_counter_3 == true && elapsed_time >= timerMax){
 		Serial.println("Timer out ...");
         Serial.println(current_time);
         print_counter_3 = false;
     }
-   }
+  }
    
    return time_signal;
 }

@@ -12,7 +12,7 @@ Inertial::Inertial(int ledProp, int ledTilt)
 	attitude_signal = false;
 
 	// Set Intel Curie IMU parameters
-	accelerometerRange = 2;
+	accelerometerRange = 16;
 	gyroRange = 250;
 	frequency = 25;
 	CurieIMU.begin();
@@ -25,9 +25,10 @@ Inertial::Inertial(int ledProp, int ledTilt)
 	// Set class functions parameters
 	ax_filt = 0.0, ay_filt = 0.0, az_filt = 0.0;
 	gx_filt = 0.0, gy_filt = 0.0, gz_filt = 0.0;
-	g = 9.81, trust = 120.0, isp = 3.7, mass = 12.0, rate = 0.80, sum = 0.0;
-	threshold = rate*trust*isp/mass; 
-	tilt_filt = 0.0;
+	tilt = 0.0, tilt_filt = 0.0, setup_filter = 2.5;
+	g = 9.81, trust = 675.0, isp = 2.952, mass = 12.1665, rate = 0.80, sum = 0.0;
+	threshold = rate*trust*isp/mass, initial_time = 0.0;
+	counter = true;
 	
 	// Setup all pins 
 	_ledProp = ledProp;
@@ -64,11 +65,19 @@ void Inertial::Update(float gain)
 
 bool Inertial::Propulsion(){
 	// Momentum calculation
-	a = (ax+1)*g;
-	sum += a*_gain/1000000.0;
+	if(!trust_signal){
+		a = (ax+1.0)*g;
+		sum += a*_gain;
+	}
 	
 	// Enable signal if propulsion system going to shut down
 	if (sum >= threshold){
+		if (counter){
+			counter = false;
+			initial_time = millis()/1000;
+			Serial.println("Propulsion system shut down !");
+			Serial.println(initial_time);
+		}
 		trust_signal = true;
 		digitalWrite(_ledProp, HIGH); 
 	}
@@ -83,9 +92,10 @@ bool Inertial::Attitude(){
 	// Get orientation
 	filter.updateIMU(gx_filt, gy_filt, gz_filt, ax_filt, ay_filt, az_filt);
 	tilt = filter.getPitch();
+	tilt_filt = tilt_filt + _gain*(tilt - tilt_filt)*setup_filter;
 	
 	// Enable signal if launcher attitude is correct
-	if (tilt >= 70.0 and tilt <= 90.0){
+	if (tilt_filt >= 60.0 and tilt_filt <= 90.0){
 		attitude_signal = true;
 		digitalWrite(_ledTilt, HIGH); 
 	}

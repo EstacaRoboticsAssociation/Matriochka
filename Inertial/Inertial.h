@@ -17,7 +17,7 @@ class Inertial
 	
   private:
 	// Constructor
-	bool trust_signal, attitude_signal;
+	bool trust_signal, attitude_signal, counter;
   	int accelerometerRange, gyroRange, frequency;
 	int _ledProp, _ledTilt;
     // Update
@@ -27,7 +27,8 @@ class Inertial
 	// Trust parameters
 	float g, a, trust, isp, mass, rate, threshold, sum;
 	// Attitude parameters
-	float tilt, tilt_filt;
+	float tilt, tilt_filt, setup_filter;
+	unsigned long initial_time;
 };
 
 #endif
